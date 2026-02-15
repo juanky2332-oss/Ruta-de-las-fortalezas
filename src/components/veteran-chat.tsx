@@ -87,9 +87,10 @@ export function VeteranChat() {
             {!isOpen && (
                 <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 animate-in fade-in duration-500">
                     {/* Tooltip/Label */}
-                    <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-5 py-3 rounded-xl shadow-2xl text-sm font-bold animate-bounce-slow border-2 border-primary-foreground/20">
-                        Aquí Fortachin, consúltame tus dudas sobre la ruta
-                        <div className="absolute -bottom-2 right-8 w-4 h-4 bg-primary rotate-45 border-r-2 border-b-2 border-primary-foreground/20"></div>
+                    {/* Tooltip/Label */}
+                    <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-3 py-2 rounded-xl shadow-xl text-xs font-bold animate-bounce-slow border-2 border-primary-foreground/20 max-w-[160px] text-center mb-1 mr-2 relative">
+                        Aquí Fortachin, consúltame tus dudas
+                        <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-primary rotate-45 border-r-2 border-b-2 border-primary-foreground/20"></div>
                     </div>
 
                     {/* Animated Button */}

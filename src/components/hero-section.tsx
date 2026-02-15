@@ -118,13 +118,13 @@ export function HeroSection() {
                     </div>
                 </div>
 
-                <div className="pt-8 relative">
+                <div className="pt-8 flex flex-col items-center gap-6">
                     <Button size="lg" className="text-lg px-8 py-6 rounded-full shadow-[0_0_20px_rgba(234,88,12,0.5)] animate-pulse">
                         Prepara tu Estrategia
                     </Button>
 
                     {/* Animated Down Arrow */}
-                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-primary animate-bounce">
+                    <div className="text-primary animate-bounce">
                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M10 3a1 1 0 011 1v10.586l2.293-2.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V4a1 1 0 011-1z" clipRule="evenodd" />
                         </svg>
