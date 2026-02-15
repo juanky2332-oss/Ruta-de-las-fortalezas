@@ -24,11 +24,19 @@ export function VeteranChat() {
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Auto-scroll to bottom
-    useEffect(() => {
+    const scrollToBottom = () => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            const scrollElement = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+            if (scrollElement) {
+                scrollElement.scrollTop = scrollElement.scrollHeight;
+            }
         }
-    }, [messages]);
+    };
+
+    useEffect(() => {
+        // Small timeout to allow DOM to update
+        setTimeout(scrollToBottom, 100);
+    }, [messages, isOpen]);
 
     const toggleChat = () => setIsOpen(!isOpen);
 
@@ -148,7 +156,7 @@ export function VeteranChat() {
 
             {/* Chat Window */}
             {isOpen && (
-                <Card className="fixed bottom-6 right-6 z-50 w-[90vw] md:w-[400px] h-[500px] shadow-2xl border-primary/20 bg-background/95 backdrop-blur-md flex flex-col animate-in slide-in-from-bottom-10 fade-in duration-300">
+                <Card className="fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 w-full h-[100dvh] md:w-[400px] md:h-[600px] shadow-2xl border-primary/20 bg-background/95 backdrop-blur-md flex flex-col animate-in slide-in-from-bottom-10 fade-in duration-300 md:rounded-xl rounded-none">
                     <CardHeader className="bg-primary/10 border-b border-primary/10 py-3 px-4 flex flex-row items-center justify-between">
                         <div className="flex items-center gap-3">
                             <div className="relative w-12 h-12 rounded-full border-2 border-primary-foreground shadow-sm overflow-hidden bg-primary flex items-center justify-center shrink-0">

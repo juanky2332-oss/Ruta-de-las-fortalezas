@@ -101,8 +101,8 @@
   /* Arde Bogotá / Cartagena Aesthetic - Dark Mode */
   /* Dark earthy/military background */
   --background: oklch(0.18 0.03 85);
-  /* Dark Warm Grey */
-  --foreground: oklch(0.95 0.01 85);
+  /* Dark Warm Grey - Increased intensity for readability */
+  --foreground: oklch(0.98 0.01 85);
   /* Off-white */
 
   --card: oklch(0.23 0.03 85);
@@ -212,9 +212,10 @@
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
-  opacity: 0.15;
+  opacity: 0.08;
   z-index: 0;
   pointer-events: none;
+  mix-blend-mode: overlay;
 }
 
 .bg-cartagena-1::before {

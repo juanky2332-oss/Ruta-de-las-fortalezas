@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { PdfSummaryTemplate } from "@/components/pdf-summary-template";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -21,6 +27,12 @@ export function StrategyCalculator() {
     const [targetTimeHours, setTargetTimeHours] = useState(10); // Default 10 hours
     const [strategy, setStrategy] = useState<StrategySegment[]>([]);
     const [terrainPaces, setTerrainPaces] = useState({ flat: "0:00", up: "0:00", down: "0:00" });
+
+    // PDF State
+    const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+    const pdfTemplateRef = useRef<HTMLDivElement>(null);
 
     // Calculate strategy whenever target time changes
     useEffect(() => {
@@ -133,6 +145,109 @@ export function StrategyCalculator() {
         return `${h}h ${m < 10 ? '0' : ''}${m}m`;
     };
 
+    const handleDownloadPdf = async () => {
+        if (!userName.trim()) return;
+        setIsGeneratingPdf(true);
+
+        try {
+            // 1. Create a temporary iframe to isolate the PDF generation from global CSS (Tailwind/oklch)
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.top = '-10000px';
+            iframe.style.left = '-10000px';
+            iframe.style.width = '210mm';
+            iframe.style.height = '297mm';
+            iframe.style.border = 'none';
+            document.body.appendChild(iframe);
+
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc) throw new Error("Could not create iframe document");
+
+            // 2. Get the HTML content from the template (which now uses inline styles)
+            // We use a temporary container to render the React component to an HTML string
+            // faster/easier: We clone the existing hidden ref content
+            if (!pdfTemplateRef.current) throw new Error("Template ref not found");
+
+            const templateContent = pdfTemplateRef.current.outerHTML;
+
+            // 3. Write clean HTML to the iframe
+            iframeDoc.open();
+            iframeDoc.write(`
+                <html>
+                <head>
+                    <style>
+                        body { margin: 0; padding: 0; background: white; font-family: sans-serif; }
+                        /* Add any specialized font resets here if needed */
+                    </style>
+                </head>
+                <body>
+                    ${templateContent}
+                </body>
+                </html>
+            `);
+            iframeDoc.close();
+
+            // Wait for images to load inside iframe
+            await new Promise((resolve) => {
+                const images = iframeDoc.getElementsByTagName('img');
+                let loadedCount = 0;
+                if (images.length === 0) resolve(true);
+
+                for (let i = 0; i < images.length; i++) {
+                    if (images[i].complete) {
+                        loadedCount++;
+                    } else {
+                        images[i].onload = () => {
+                            loadedCount++;
+                            if (loadedCount === images.length) resolve(true);
+                        };
+                        images[i].onerror = () => { // Resolving even on error to avoid hanging
+                            loadedCount++;
+                            if (loadedCount === images.length) resolve(true);
+                        };
+                    }
+                }
+                if (loadedCount === images.length) resolve(true);
+            });
+
+            // 4. Generate PDF from the CLEAN iframe content
+            const canvas = await html2canvas(iframeDoc.body, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                windowWidth: 794, // A4 pixel width at 96dpi approx
+                windowHeight: 1123
+            });
+
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+
+            // Add clickable link over the "powered by [Logo]" area
+            // Footer is aligned to the bottom right with generous padding.
+            // A4 Height 297mm. Padding bottom ~40px (~10mm).
+            // Link Position: x=155mm, y=275mm (approx), w=45mm, h=12mm
+            pdf.link(155, 275, 45, 12, { url: 'https://www.flownexion.com' });
+
+            pdf.save(`Estrategia_Fortalezas_2026_${userName.replace(/\s+/g, '_')}.pdf`);
+
+            // Cleanup
+            document.body.removeChild(iframe);
+            setIsPdfDialogOpen(false);
+            setUserName("");
+
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            alert(`Hubo un error al generar el PDF: ${error instanceof Error ? error.message : String(error)}`);
+        } finally {
+            setIsGeneratingPdf(false);
+        }
+    };
+
     return (
         <section className="py-20 px-4 bg-stone-900 text-white relative overflow-hidden bg-cartagena-subtle bg-cartagena-3">
             {/* Decorative background elements */}
@@ -224,7 +339,7 @@ export function StrategyCalculator() {
                     ))}
                 </div>
 
-                <div className="mt-8 flex justify-center gap-4">
+                <div className="mt-8 flex flex-col md:flex-row justify-center gap-4">
                     <Button
                         size="lg"
                         className="gap-2 bg-primary hover:bg-primary/80 text-white px-8 transition-transform hover:scale-105"
@@ -247,7 +362,15 @@ export function StrategyCalculator() {
                             }
                         }}
                     >
-                        <Share2 className="w-5 h-5" /> Compartir Estrategia (WhatsApp / Email)
+                        <Share2 className="w-5 h-5" /> Compartir
+                    </Button>
+
+                    <Button
+                        size="lg"
+                        className="gap-2 bg-accent hover:bg-accent/80 text-white px-8 transition-transform hover:scale-105"
+                        onClick={() => setIsPdfDialogOpen(true)}
+                    >
+                        <Download className="w-5 h-5" /> Descargar PDF
                     </Button>
                 </div>
 
@@ -255,6 +378,54 @@ export function StrategyCalculator() {
                     <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                     <p>Este plan es una estimación basada en algoritmos generales. El clima, tu estado físico y las condiciones del terreno pueden alterar estos tiempos considerablemente. Escucha a tu cuerpo.</p>
                 </div>
+            </div>
+
+            {/* Name Input Dialog */}
+            <Dialog open={isPdfDialogOpen} onOpenChange={setIsPdfDialogOpen}>
+                <DialogContent className="sm:max-w-md bg-stone-900 border-stone-700 text-stone-100">
+                    <DialogHeader>
+                        <DialogTitle>Personaliza tu Estrategia</DialogTitle>
+                        <DialogDescription className="text-stone-400">
+                            Dinos tu nombre para generar tu carnet de estrategia personalizado.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="flex items-center space-x-2 py-4">
+                        <div className="grid flex-1 gap-2">
+                            <Label htmlFor="name" className="sr-only">
+                                Nombre
+                            </Label>
+                            <Input
+                                id="name"
+                                placeholder="Tu nombre..."
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                className="bg-stone-800 border-stone-600 text-white placeholder:text-stone-500"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter className="sm:justify-end">
+                        <Button variant="secondary" onClick={() => setIsPdfDialogOpen(false)} className="bg-stone-800 text-stone-300 hover:bg-stone-700">
+                            Cancelar
+                        </Button>
+                        <Button type="button" onClick={handleDownloadPdf} disabled={!userName.trim() || isGeneratingPdf} className="bg-primary text-white hover:bg-primary/90">
+                            {isGeneratingPdf ? "Generando..." : "Descargar PDF"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Hidden PDF Template Renderer */}
+            <div className="fixed top-0 left-0 -z-50 opacity-0 pointer-events-none">
+                {/*  Rendered only when needed, or always rendered but hidden. 
+                      Ideally always rendered allows images to load. 
+                  */}
+                <PdfSummaryTemplate
+                    ref={pdfTemplateRef}
+                    userName={userName}
+                    targetTime={formatTime(targetTimeHours)}
+                    strategy={strategy}
+                    terrainPaces={terrainPaces}
+                />
             </div>
         </section>
     );

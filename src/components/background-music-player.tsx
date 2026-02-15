@@ -89,36 +89,56 @@ export function BackgroundMusicPlayer() {
     };
 
     return (
-        <div className="fixed bottom-6 left-6 z-50 flex items-center gap-3 bg-gradient-to-br from-stone-900/95 to-stone-800/95 backdrop-blur-md px-4 py-3 rounded-xl shadow-2xl border border-primary/20">
+        <>
             <audio
                 ref={audioRef}
                 src={playlist[currentTrack].audioUrl}
                 preload="metadata"
             />
 
-            <Button
-                onClick={togglePlay}
-                size="icon"
-                variant="ghost"
-                className="h-10 w-10 rounded-full bg-primary/20 hover:bg-primary/30 text-primary"
-            >
-                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-            </Button>
+            {/* Desktop / Tablet Player (Full Bar) - Hidden on Mobile */}
+            <div className="hidden md:flex fixed bottom-6 left-6 z-50 items-center gap-3 bg-gradient-to-br from-stone-900/95 to-stone-800/95 backdrop-blur-md px-4 py-3 rounded-xl shadow-2xl border border-primary/20">
 
-            <div className="flex flex-col">
-                <span className="text-xs font-semibold text-foreground">
-                    {playlist[currentTrack].title}
-                </span>
+                <Button
+                    onClick={togglePlay}
+                    size="icon"
+                    variant="ghost"
+                    className="h-10 w-10 rounded-full bg-primary/20 hover:bg-primary/30 text-primary"
+                >
+                    {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                </Button>
+
+                <div className="flex flex-col">
+                    <span className="text-xs font-semibold text-foreground">
+                        {playlist[currentTrack].title}
+                    </span>
+                </div>
+
+                <Button
+                    onClick={toggleMute}
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 rounded-full hover:bg-primary/20 text-muted-foreground hover:text-primary"
+                >
+                    {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </Button>
             </div>
 
-            <Button
-                onClick={toggleMute}
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 rounded-full hover:bg-primary/20 text-muted-foreground hover:text-primary"
-            >
-                {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </Button>
-        </div>
+            {/* Mobile Player (Minimized Bubble) - Visible only on Mobile */}
+            <div className="md:hidden fixed bottom-6 left-6 z-[9999] flex items-center justify-center">
+                <Button
+                    onClick={togglePlay}
+                    className="rounded-full w-14 h-14 bg-black/20 border border-white/20 text-white/90 shadow-2xl backdrop-blur-none hover:bg-black/40 transition-all p-0 flex items-center justify-center"
+                >
+                    <div className={`relative w-full h-full flex items-center justify-center`}>
+                        {isPlaying ? (
+                            <span className="text-2xl animate-pulse">⏸️</span>
+                        ) : (
+                            <span className="text-2xl">🎵</span>
+                        )}
+                    </div>
+                </Button>
+            </div>
+        </>
     );
 }
