@@ -370,7 +370,7 @@ export function StrategyCalculator() {
                         className="gap-2 bg-accent hover:bg-accent/80 text-white px-8 transition-transform hover:scale-105"
                         onClick={() => setIsPdfDialogOpen(true)}
                     >
-                        <Download className="w-5 h-5" /> Descargar PDF
+                        <Download className="w-5 h-5" /> Descarga tu estrategia en PDF
                     </Button>
                 </div>
 
