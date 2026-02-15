@@ -176,7 +176,7 @@ export const PdfSummaryTemplate = React.forwardRef<HTMLDivElement, PdfSummaryPro
                 <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '11px', color: colors.textMuted, fontStyle: 'italic', fontWeight: 600 }}>powered by</span>
                     <a href="https://www.flownexion.com" target="_blank" style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src="/logo floxnexion.png" alt="Flownexion" style={{ height: '32px', objectFit: 'contain' }} />
+                        <img src="/logo flownexion letras oscuras.jpeg" alt="Flownexion" style={{ height: '32px', objectFit: 'contain' }} />
                     </a>
                 </div>
             </div>

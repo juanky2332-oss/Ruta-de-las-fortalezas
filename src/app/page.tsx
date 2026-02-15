@@ -30,21 +30,21 @@ export default function Home() {
             >
               <div className="flex items-center justify-center mb-4">
                 <img
-                  src="/logo floxnexion.png"
+                  src="/logo flownexion letras en blanco.jpeg"
                   alt="Flownexion"
-                  className="h-20 object-contain"
+                  className="h-24 object-contain mix-blend-screen"
                 />
               </div>
             </a>
             <h3 className="text-xl font-bold text-white">
-              ¿Quieres automatizar tu empresa o crear apps personalizadas?
+              ¿Tu empresa ya aprovecha la IA o sigue perdiendo horas en procesos obsoletos?
             </h3>
             <p className="text-gray-300 max-w-2xl mx-auto">
-              Desde gestión de objetivos hasta automatización de procesos diarios. Creamos soluciones con IA adaptadas a tus necesidades.
+              Creamos automatizaciones e IA a medida que devuelven el tiempo a tu equipo y optimizan cada proceso.
             </p>
             <div className="flex flex-col items-center gap-2">
               <span className="text-sm text-gray-400 font-medium animate-pulse">
-                ¿Tienes un proyecto? ¡Hablemos! 👇
+                ¿Hablamos de tu caso? 👇
               </span>
               <a
                 href="mailto:juancarlos@flownexion.com"
