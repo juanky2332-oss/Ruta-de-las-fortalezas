@@ -40,9 +40,12 @@ export function VeteranChat() {
 
     const toggleChat = () => setIsOpen(!isOpen);
 
+    const [avatarError, setAvatarError] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!inputValue.trim() || isLoading) return;
+        if (!inputValue.trim() || isLoading || isBlocked) return;
 
         const userMsg: Message = {
             id: Date.now().toString(),
@@ -50,7 +53,6 @@ export function VeteranChat() {
             content: inputValue
         };
 
-        // UI Updates immediately
         setMessages(prev => [...prev, userMsg]);
         setInputValue('');
         setIsLoading(true);
@@ -65,17 +67,23 @@ export function VeteranChat() {
             if (!response.ok) throw new Error('Error en la respuesta');
 
             const data = await response.json();
+            let content = data.content;
+
+            // Check for blocking token
+            if (content.includes('[BLOQUEADO]')) {
+                setIsBlocked(true);
+                content = content.replace('[BLOQUEADO]', '').trim();
+            }
 
             const assistantMsg: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: data.content
+                content: content
             };
 
             setMessages(prev => [...prev, assistantMsg]);
         } catch (error) {
             console.error(error);
-            // Optional: Show error in chat
             const errorMsg: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
@@ -87,14 +95,11 @@ export function VeteranChat() {
         }
     };
 
-    const [avatarError, setAvatarError] = useState(false);
-
     return (
         <>
             {/* Floating Button with Label */}
             {!isOpen && (
                 <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 animate-in fade-in duration-500">
-                    {/* Tooltip/Label */}
                     {/* Tooltip/Label */}
                     <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-3 py-2 rounded-xl shadow-xl text-xs font-bold animate-bounce-slow border-2 border-primary-foreground/20 max-w-[160px] text-center mb-1 mr-2 relative">
                         Aquí Fortachin, consúltame tus dudas
@@ -181,7 +186,7 @@ export function VeteranChat() {
                                                 onError={() => setAvatarError(true)}
                                             />
                                         </motion.div>
-                                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full z-10"></span>
+                                        <span className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-background rounded-full z-10 ${isBlocked ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></span>
                                     </div>
                                 ) : (
                                     <Bot className="w-6 h-6 text-primary-foreground" />
@@ -193,8 +198,8 @@ export function VeteranChat() {
                                     <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-[10px] uppercase text-primary font-extrabold tracking-wider">Bot</span>
                                 </CardTitle>
                                 <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                                    Tu compañero de ruta 🏃‍♂️
+                                    <span className={`w-1.5 h-1.5 rounded-full ${isBlocked ? 'bg-red-500' : 'bg-green-500 animate-pulse'}`}></span>
+                                    {isBlocked ? 'Desconectado' : 'Tu compañero de ruta 🏃‍♂️'}
                                 </p>
                             </div>
                         </div>
@@ -269,14 +274,14 @@ export function VeteranChat() {
                                                     <ReactMarkdown
                                                         components={{
                                                             strong: ({ ...props }) => <span className="font-bold text-primary" {...props} />,
-                                                            ul: ({ ...props }) => <ul className="list-disc pl-4 my-0.5 space-y-0" {...props} />,
-                                                            ol: ({ ...props }) => <ol className="list-decimal pl-4 my-0.5 space-y-0" {...props} />,
-                                                            li: ({ ...props }) => <li className="pl-1 leading-tight" {...props} />,
-                                                            p: ({ ...props }) => <p className="mb-1 last:mb-0 leading-tight" {...props} />,
-                                                            h1: ({ ...props }) => <h3 className="font-bold text-sm mt-2 mb-0.5 text-primary" {...props} />,
-                                                            h2: ({ ...props }) => <h3 className="font-bold text-sm mt-2 mb-0.5 text-primary" {...props} />,
-                                                            h3: ({ ...props }) => <h3 className="font-bold text-sm mt-2 mb-0 text-primary" {...props} />,
-                                                            h4: ({ ...props }) => <h4 className="font-bold text-xs mt-1.5 mb-0 text-primary uppercase tracking-wide" {...props} />,
+                                                            ul: ({ ...props }) => <ul className="list-disc pl-4 my-0 space-y-0" {...props} />,
+                                                            ol: ({ ...props }) => <ol className="list-decimal pl-4 my-0 space-y-0" {...props} />,
+                                                            li: ({ ...props }) => <li className="pl-1 leading-snug" {...props} />,
+                                                            p: ({ ...props }) => <p className="mb-1 last:mb-0 leading-snug" {...props} />,
+                                                            h1: ({ ...props }) => <h3 className="font-bold text-sm mt-1 mb-0 text-primary" {...props} />,
+                                                            h2: ({ ...props }) => <h3 className="font-bold text-sm mt-1 mb-0 text-primary" {...props} />,
+                                                            h3: ({ ...props }) => <h3 className="font-bold text-sm mt-1 mb-0 text-primary" {...props} />,
+                                                            h4: ({ ...props }) => <h4 className="font-bold text-xs mt-1 mb-0 text-primary uppercase tracking-wide" {...props} />,
                                                         }}
                                                     >
                                                         {m.content}
@@ -310,10 +315,11 @@ export function VeteranChat() {
                                 <Input
                                     value={inputValue}
                                     onChange={(e) => setInputValue(e.target.value)}
-                                    placeholder="Pregunta sobre la carrera..."
+                                    placeholder={isBlocked ? "Chat desactivado" : "Pregunta sobre la carrera..."}
                                     className="flex-1 bg-background"
+                                    disabled={isLoading || isBlocked}
                                 />
-                                <Button type="submit" size="icon" disabled={isLoading || !inputValue.trim()}>
+                                <Button type="submit" size="icon" disabled={isLoading || !inputValue.trim() || isBlocked}>
                                     <Send className="w-4 h-4" />
                                 </Button>
                             </form>
