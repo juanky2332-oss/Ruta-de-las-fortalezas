@@ -11,12 +11,12 @@ export default function manifest(): MetadataRoute.Manifest {
         theme_color: '#ffffff',
         icons: [
             {
-                src: '/logo flownexion 2026.jpeg',
+                src: '/fortalezas-logo.jpg',
                 sizes: '192x192',
                 type: 'image/jpeg',
             },
             {
-                src: '/logo flownexion 2026.jpeg',
+                src: '/fortalezas-logo.jpg',
                 sizes: '512x512',
                 type: 'image/jpeg',
             },
