@@ -16,6 +16,7 @@ export default async function Image() {
     // Read the logo file from the public directory
     const logoPath = join(process.cwd(), 'public', 'fortalezas-logo.jpg')
     const logoData = await readFile(logoPath)
+    const logoBase64 = `data:image/jpeg;base64,${logoData.toString('base64')}`
 
     return new ImageResponse(
         (
@@ -29,9 +30,8 @@ export default async function Image() {
                     justifyContent: 'center',
                 }}
             >
-                {/* @ts-ignore */}
                 <img
-                    src={logoData.buffer as ArrayBuffer}
+                    src={logoBase64}
                     style={{
                         objectFit: 'contain',
                         width: '80%',
