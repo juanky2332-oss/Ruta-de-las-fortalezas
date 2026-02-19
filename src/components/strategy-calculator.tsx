@@ -278,14 +278,14 @@ export function StrategyCalculator() {
                         <div className="py-6">
                             <Slider
                                 value={[targetTimeHours]}
-                                min={5}
+                                min={3.5}
                                 max={12}
                                 step={0.10} // 6 min steps
                                 onValueChange={(vals) => setTargetTimeHours(vals[0])}
                                 className="cursor-pointer"
                             />
                             <div className="flex justify-between mt-2 text-stone-500 text-sm">
-                                <span>🚀 Élite (5h)</span>
+                                <span>🚀 Élite (3h 30m)</span>
                                 <span>🏃 Corredor (8h)</span>
                                 <span>🚶 Finisher (12h)</span>
                             </div>
